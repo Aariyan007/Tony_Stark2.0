@@ -1,0 +1,31 @@
+🔍 OSINT TOOL - CONSENT AGREEMENT
+
+I, [User Name], hereby authorize this tool to:
+
+SEARCH PERMISSION:
+[ ] Search my PUBLIC social media profiles
+[ ] Use my photo for facial recognition
+[ ] Search public records and databases
+[ ] Collect publicly available information
+
+DATA USAGE:
+[ ] Generate personal digital footprint report
+[ ] Store results for 30 days maximum
+[ ] Use data for tool improvement only
+
+MY RIGHTS:
+I can DELETE my data anytime
+I can see ALL collected information  
+I can WITHDRAW consent anytime
+My data will NEVER be sold/shared
+
+LEGAL UNDERSTANDING:
+- This tool only accesses PUBLIC information
+- I am over 18 years old
+- This is for PERSONAL use only
+- I understand the risks of digital footprint analysis
+
+SIGNATURE: ___________________
+DATE: ________________________
+
+Type "I AGREE" to continue: 
