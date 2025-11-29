@@ -4,3 +4,9 @@ __pycache__/
 *.log
 *.json
 .DS_Store
+config.py
+# git add .\
+~/.deepface/
+data/targets/
+data/logs/
+data/reports/
