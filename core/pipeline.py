@@ -6,7 +6,10 @@ from modules.social_media.username_scan import scan_usernames
 from modules.social_media.profile_picture import extract_profile_picture
 from modules.social_media.instagram import scrape_instagram
 from modules.social_media.github import scrape_github
-from modules.social_media.linkedin import find_linkedin_profile
+# from modules.social_media.linkedin import find_linkedin_profile
+from modules.social_media.linkedin_inference import find_linkedin_profile as infer_linkedin_profile
+from modules.social_media.linkedin import scrape_linkedin_profile
+
 
 
 
@@ -33,6 +36,10 @@ def process_image(image_path):
     
     # ===== LINKEDIN INFERENCE =====
     linkedin_best = _find_best_linkedin_profile()
+    linkedin_profile_data = None
+    if linkedin_best:
+        linkedin_profile_data = scrape_linkedin_profile(linkedin_best["link"])
+
     
     return {
         "faces": faces["faces"],
@@ -113,21 +120,31 @@ def _scan_social_platforms():
 
 
 def _find_best_linkedin_profile():
-    """Find and score the best LinkedIn profile match."""
+    """Use scoring-based inference to find the most likely LinkedIn profile."""
     print("\n[OSINT] Trying to locate LinkedIn profile...")
 
-    # Build extra query with context keywords
-    extra_query = "Kerala computer science developer"
-    
-    linkedin_profile = find_linkedin_profile(
-        full_name="Aariyan-s",
-        extra_query=extra_query,
+    full_name = "Aariyan-S"
+
+    # You can later derive these from scan_usernames(), but for now hardcode
+    usernames = ["aariyan007", "aariyan_07", "aariyan","aariyan-s"]  # your known handles
+    locations = ["Kerala", "India"]
+    keywords = ["computer science", "developer", "CSE","ernakulam"]
+
+    best = infer_linkedin_profile(
+        full_name=full_name,
+        usernames=usernames,
+        locations=locations,
+        keywords=keywords,
     )
 
-    if linkedin_profile:
-        print("[LinkedIn] Found profile:")
-        print(f"  URL: {linkedin_profile}")
-    else:
-        print("[LinkedIn] No LinkedIn profile found")
+    if not best:
+        print("[LinkedIn] No reliable LinkedIn match found")
+        return None
+
+    print("[LinkedIn] Best candidate:")
+    print(f"  URL:   {best['link']}")
+    print(f"  Title: {best.get('title')}")
+    print(f"  Score: {best.get('score')}")
     
-    return linkedin_profile
+
+    return best

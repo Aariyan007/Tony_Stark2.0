@@ -144,7 +144,12 @@ def find_linkedin_profile(
     best = linkedin_candidates[0]
 
     # If score is super low, treat as "no reliable match"
-    if best["score"] < 40:
-        return None
+    # if best["score"] < 40:
+    #     return None
+    
+    print("[LinkedIn] Candidates and scores:")
+    for c in linkedin_candidates:
+        print(f" - {c.get('link')} | score={c.get('score')} | title={c.get('title')}")
+
 
     return best
