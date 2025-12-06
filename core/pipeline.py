@@ -33,10 +33,9 @@ def process_image(image_path: str, person_context: Optional[Dict[str, Any]] = No
         Complete OSINT profile
     """
     print("\n" + "="*70)
-    print("🔍 PRODUCTION OSINT PIPELINE")
+    print("PRODUCTION OSINT PIPELINE")
     print("="*70)
     
-    # Default context if not provided
     if person_context is None:
         person_context = {
             "full_name": "Aariyan S",
@@ -50,13 +49,10 @@ def process_image(image_path: str, person_context: Optional[Dict[str, Any]] = No
             ]
         }
 
-    # Step 1: Extract face data
     faces = _extract_face_data(image_path)
 
-    # Step 2: Perform OSINT search
     search_results = _perform_osint_search(person_context)
 
-    # Step 3: Scan usernames
     usernames = _scan_social_platforms(person_context["known_usernames"])
 
     # Step 4: Scrape Instagram with face matching
@@ -96,10 +92,10 @@ def process_image(image_path: str, person_context: Optional[Dict[str, Any]] = No
         emails=emails,
     )
     
-    # Step 10: Advanced Neo4j operations
+    
     neo = Neo4jClient()
     try:
-        # Find similar faces
+
         print("\n[SIMILARITY] Finding similar faces...")
         similar_faces = neo.find_similar_faces(person_id, similarity_threshold=0.7, limit=5)
         if similar_faces:
@@ -109,21 +105,20 @@ def process_image(image_path: str, person_context: Optional[Dict[str, Any]] = No
         else:
             print("[SIMILARITY] No similar faces found")
         
-        # Infer network connections
+
         print("\n[NETWORK] Inferring connections...")
         connections = neo.infer_connections(person_id, min_connection_strength=2)
         if connections:
-            print(f"[NETWORK] ✓ Found {len(connections)} potential connections")
+            print(f"[NETWORK] Found {len(connections)} potential connections")
             for conn in connections:
                 print(f"  - {conn['name']}: connection strength {conn['connection_strength']}")
         else:
             print("[NETWORK] No connections found")
         
-        # Update data completeness
+
         print("\n[QUALITY] Calculating data completeness...")
         completeness = neo.update_data_completeness(person_id)
         
-        # Get statistics
         stats = neo.get_statistics()
         print("\n[DATABASE] Statistics:")
         for key, value in stats.items():
@@ -133,7 +128,7 @@ def process_image(image_path: str, person_context: Optional[Dict[str, Any]] = No
         neo.close()
 
     print("\n" + "="*70)
-    print("✓ PIPELINE COMPLETED SUCCESSFULLY")
+    print("PIPELINE COMPLETED SUCCESSFULLY")
     print("="*70)
 
     return {
@@ -168,7 +163,7 @@ def _extract_face_data(image_path: str) -> Dict[str, Any]:
             detector_backend="retinaface",
             enforce_detection=False,
         )
-        print(f"[FACE] ✓ Detected {len(faces)} face(s)")
+        print(f"[FACE] Detected {len(faces)} face(s)")
 
         analysis = DeepFace.analyze(
             img_path=image_path,
@@ -189,7 +184,7 @@ def _extract_face_data(image_path: str) -> Dict[str, Any]:
             detector_backend="retinaface",
             enforce_detection=False,
         )
-        print(f"[FACE] ✓ Embedding created: {len(embedding[0]['embedding'])} dimensions")
+        print(f"[FACE] Embedding created: {len(embedding[0]['embedding'])} dimensions")
 
         save_embedding("user_test", embedding)
 
@@ -200,7 +195,7 @@ def _extract_face_data(image_path: str) -> Dict[str, Any]:
         }
     
     except Exception as e:
-        print(f"[FACE] ✗ Face extraction failed: {e}")
+        print(f"[FACE] Face extraction failed: {e}")
         raise
 
 
@@ -229,12 +224,12 @@ def _perform_osint_search(context: Dict[str, Any]) -> List[Dict]:
                 social_results.append(r)
                 print(f"  - {r.get('title', 'N/A')[:60]}")
         
-        print(f"[OSINT] ✓ Found {len(social_results)} social media links")
+        print(f"[OSINT] Found {len(social_results)} social media links")
 
         return search_results
     
     except Exception as e:
-        print(f"[OSINT] ✗ Search failed: {e}")
+        print(f"[OSINT] Search failed: {e}")
         return []
 
 
@@ -248,10 +243,10 @@ def _scan_social_platforms(usernames: List[str]) -> List[Dict]:
         try:
             results = scan_usernames(username)
             all_results.extend(results)
-            print(f"[SCAN] ✓ '{username}': found {len(results)} accounts")
+            print(f"[SCAN] '{username}': found {len(results)} accounts")
         
         except Exception as e:
-            print(f"[SCAN] ✗ Failed to scan '{username}': {e}")
+            print(f"[SCAN] Failed to scan '{username}': {e}")
 
     return all_results
 
@@ -272,9 +267,9 @@ def _discover_linkedin(context: Dict[str, Any]) -> tuple:
             print("[LINKEDIN] ✗ No reliable match found")
             return None, None
 
-        print(f"[LINKEDIN] ✓ Best candidate found (score: {best.get('score')}/100)")
+        print(f"[LINKEDIN] Best candidate found (score: {best.get('score')}/100)")
         
-        # Scrape the profile
+
         linkedin_url = best.get("link")
         if linkedin_url:
             profile_data = scrape_linkedin_profile(linkedin_url)
@@ -298,7 +293,6 @@ def _extract_entities(
     locations = []
     organizations = []
     
-    # From context
     for loc in context.get("locations", []):
         locations.append({
             "name": loc,
@@ -306,9 +300,8 @@ def _extract_entities(
             "confidence": 80.0
         })
     
-    # From LinkedIn
     if linkedin_data:
-        # Location
+
         if linkedin_data.get("location"):
             locations.append({
                 "name": linkedin_data["location"],
@@ -316,7 +309,6 @@ def _extract_entities(
                 "confidence": 90.0
             })
         
-        # Organizations from experiences
         if linkedin_data.get("experiences"):
             for exp in linkedin_data["experiences"]:
                 if exp.get("company"):
@@ -328,7 +320,6 @@ def _extract_entities(
                         "source": "linkedin_experience"
                     })
         
-        # Organizations from education
         if linkedin_data.get("education"):
             for edu in linkedin_data["education"]:
                 if edu.get("school"):
@@ -340,7 +331,7 @@ def _extract_entities(
                         "source": "linkedin_education"
                     })
     
-    # From GitHub
+
     if github_data and github_data.get("location"):
         locations.append({
             "name": github_data["location"],
@@ -348,14 +339,13 @@ def _extract_entities(
             "confidence": 85.0
         })
     
-    # Deduplicate
     unique_locations = {loc["name"]: loc for loc in locations}
     locations = list(unique_locations.values())
     
     unique_orgs = {org["name"]: org for org in organizations}
     organizations = list(unique_orgs.values())
     
-    print(f"[ENTITIES] ✓ Found {len(locations)} locations, {len(organizations)} organizations")
+    print(f"[ENTITIES] Found {len(locations)} locations, {len(organizations)} organizations")
     
     return locations, organizations
 
@@ -369,7 +359,6 @@ def _discover_emails(
     """Discover potential email addresses"""
     print("\n[EMAIL] Discovering email addresses...")
     
-    # Filter out None accounts
     valid_accounts = [acc for acc in accounts if acc is not None]
     
     discovery = EmailDiscovery()
@@ -381,13 +370,12 @@ def _discover_emails(
         organizations=organizations
     )
     
-    # Filter to only high-confidence emails (> 50%)
     high_confidence_emails = [e for e in emails if e["confidence"] >= 50.0]
     
-    print(f"[EMAIL] ✓ Discovered {len(emails)} potential emails")
-    print(f"[EMAIL] ✓ {len(high_confidence_emails)} high-confidence emails")
+    print(f"[EMAIL] Discovered {len(emails)} potential emails")
+    print(f"[EMAIL] {len(high_confidence_emails)} high-confidence emails")
     
-    # Show top emails
+
     for email in high_confidence_emails[:5]:
         print(f"  - {email['address']} ({email['confidence']:.1f}% confidence)")
     
@@ -413,7 +401,7 @@ def _push_to_neo4j(
 
     embedding_list = faces.get("embedding") or []
     if not embedding_list:
-        print("[NEO4J] ✗ No embedding found, skipping")
+        print("[NEO4J] No embedding found, skipping")
         return person_id
 
     emb_vec = embedding_list[0]["embedding"]
@@ -424,7 +412,6 @@ def _push_to_neo4j(
     neo = Neo4jClient()
 
     try:
-        # Create Person node with embedding
         neo.upsert_person_with_embedding(
             person_id=person_id,
             name=person_name,
@@ -433,9 +420,8 @@ def _push_to_neo4j(
             age=age,
             gender=gender,
         )
-        print("[NEO4J] ✓ Person node created")
+        print("[NEO4J] Person node created")
 
-        # Link accounts
         if instagram_result:
             face_match = instagram_result.get("face_match_result") or {}
             confidence = face_match.get("confidence", 0.0)
@@ -451,7 +437,7 @@ def _push_to_neo4j(
                 source="instagram_face_match",
                 metadata={"face_match": face_match}
             )
-            print(f"[NEO4J] ✓ Instagram linked (confidence: {confidence:.1f}%)")
+            print(f"[NEO4J] Instagram linked (confidence: {confidence:.1f}%)")
 
         if github_info:
             neo.link_account(
@@ -466,7 +452,7 @@ def _push_to_neo4j(
                 source="github_scrape",
                 metadata={"public_repos": github_info.get("public_repos")}
             )
-            print("[NEO4J] ✓ GitHub linked")
+            print("[NEO4J] GitHub linked")
 
         if linkedin_scraped:
             linkedin_score = linkedin_inferred.get("score", 50) if linkedin_inferred else 50
@@ -485,7 +471,6 @@ def _push_to_neo4j(
             )
             print(f"[NEO4J] ✓ LinkedIn linked (score: {linkedin_score})")
         
-        # Link locations
         if locations:
             for loc in locations:
                 neo.link_location(
@@ -496,7 +481,6 @@ def _push_to_neo4j(
                 )
             print(f"[NEO4J] ✓ {len(locations)} locations linked")
         
-        # Link organizations
         if organizations:
             for org in organizations:
                 neo.link_organization(
@@ -506,11 +490,9 @@ def _push_to_neo4j(
                     role=org.get("role"),
                     org_type=org.get("type")
                 )
-            print(f"[NEO4J] ✓ {len(organizations)} organizations linked")
+            print(f"[NEO4J] {len(organizations)} organizations linked")
         
-        # Link emails
         if emails:
-            # Only add high-confidence emails
             high_conf_emails = [e for e in emails if e["confidence"] >= 60.0]
             for email in high_conf_emails:
                 neo.link_email(
@@ -521,14 +503,14 @@ def _push_to_neo4j(
                     source=email["source"],
                     confidence=email["confidence"]
                 )
-            print(f"[NEO4J] ✓ {len(high_conf_emails)} emails linked")
+            print(f"[NEO4J] {len(high_conf_emails)} emails linked")
 
-        print("[NEO4J] ✓ All data pushed successfully")
+        print("[NEO4J] All data pushed successfully")
         
         return person_id
 
     except Exception as e:
-        print(f"[NEO4J] ✗ Failed to push data: {e}")
+        print(f"[NEO4J] Failed to push data: {e}")
         return person_id
     
     finally:
