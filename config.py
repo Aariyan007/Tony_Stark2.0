@@ -1,4 +1,0 @@
-SERPAPI_KEY = "228c37675b6862fddea4fccfffa15cb4dacb4335c2146cea674ae4d259cd4f02"
-NEO4J_USER = "neo4j"
-NEO4J_PASSWORD = "7EQZmccQNIvFFsANY55KocQJQ6xmErlq8JmulhQARn4"
-NEO4J_URI = "neo4j+s://fc323389.databases.neo4j.io"
